@@ -57,6 +57,7 @@ from zerver.lib.actions import (
     do_create_user,
     get_client,
     do_add_alert_words,
+    check_send_message,
 )
 
 from zerver.lib.upload import create_attachment
@@ -2731,3 +2732,20 @@ class MessageHydrationTest(ZulipTestCase):
 
         self.assertIn('class="user-mention"', new_message['content'])
         self.assertEqual(new_message['flags'], ['mentioned'])
+
+class OctopusTest(ZulipTestCase):
+    def test_change_welcome_message(self) -> None:
+        sender = get_user('iago@zulip.com', get_realm('zulip'))
+        client = make_client(name="test suite")
+        message_id = check_send_message(sender, client, "stream", ["Verona"], "Zulip Octopus test", "welcome")
+        self.assertEqual(
+            Message.objects.values_list("content", flat=True).get(id=message_id),
+            "Welcome to Zulip :octopus:")
+
+    def test_leave_welcome_message_alone(self) -> None:
+        sender = get_user('iago@zulip.com', get_realm('zulip'))
+        client = make_client(name="test suite")
+        message_id = check_send_message(sender, client, "stream", ["Verona"], "Zulip Octopus test", "Welcome everyone!")
+        self.assertEqual(
+            Message.objects.values_list("content", flat=True).get(id=message_id),
+            "Welcome everyone!")

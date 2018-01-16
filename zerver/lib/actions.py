@@ -1648,11 +1648,15 @@ def check_send_message(sender: UserProfile, client: Client, message_type_name: T
                        local_id: Optional[Text]=None,
                        sender_queue_id: Optional[Text]=None) -> int:
 
+
     addressee = Addressee.legacy_build(
         sender,
         message_type_name,
         message_to,
         topic_name)
+
+    if(message_content == "welcome"):
+        message_content = "Welcome to zulip :octopus:"
 
     message = check_message(sender, client, addressee,
                             message_content, realm, forged, forged_timestamp,
